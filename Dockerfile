@@ -91,6 +91,7 @@ LABEL org.opencontainers.image.authors="Mark Lopez <m@silvenga.com>" \
 
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_KEEP_ENV=1 \
+    PAGER=cat \
     BUN_INSTALL="/home/agent/.bun" \
     CARGO_HOME="/home/agent/.cargo" \
     NVM_DIR="/home/agent/.nvm" \
