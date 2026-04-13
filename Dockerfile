@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim AS base
+FROM debian:trixie-slim AS base
 
 ARG URL_7Z=https://github.com/ip7z/7zip/releases/download/26.00/7z2600-linux-x64.tar.xz
 ARG S6_OVERLAY_VERSION=3.2.2.0
@@ -28,11 +28,27 @@ RUN set -xe \
     cmake \
     clang \
     lld \
+    libclang-dev \
     # General CLI
     jq \
     sqlite3 \
     unzip \
     dnsutils \
+    # Dev Tooling \
+    postgresql-client \
+    redis-tools \
+    # Python
+    python3-pip \
+    pipx \
+    # Network debugging \
+    whois \
+    nmap \
+    mtr-tiny \
+    tshark \
+    tcpdump \
+    socat \
+    # Proxying \
+    proxychains4 \
     # 7zz
     && wget ${URL_7Z} -O 7z.tar.xz \
     && tar xvf 7z.tar.xz -C /tmp/ \
