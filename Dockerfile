@@ -46,6 +46,7 @@ RUN set -xe \
 RUN set -xe \
     && apt-get update \
     && apt-get dist-upgrade -y \
+    && apt-get install -y \
     # Rust build deps
     cmake \
     clang \
