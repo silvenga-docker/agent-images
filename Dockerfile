@@ -24,6 +24,7 @@ RUN set -xe \
     libssl-dev \
     ripgrep \
     fd-find \
+    gnupg \
     # 7zz
     && wget ${URL_7Z} -O 7z.tar.xz \
     && tar xvf 7z.tar.xz -C /tmp/ \
