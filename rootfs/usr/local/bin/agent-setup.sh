@@ -32,9 +32,3 @@ ln -sfn "$(dirname "$(dirname "$(nvm which default)")")" "$NVM_DIR/current"
 # Install OpenChamber
 echo "Ensuring OpenChamber is installed..."
 curl -fsSL https://raw.githubusercontent.com/btriapitsyn/openchamber/main/scripts/install.sh | bash
-
-# Add opencode completion to .bashrc
-if ! grep -q "opencode completion" ~/.bashrc 2>/dev/null; then
-    echo "Adding opencode completion to .bashrc..."
-    opencode completion >> ~/.bashrc
-fi
