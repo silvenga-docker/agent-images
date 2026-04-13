@@ -9,6 +9,12 @@ services:
     volumes:
       - agent-home:/home/agent
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_PTRACE
+      - NET_RAW
+      - NET_ADMIN
 
 volumes:
   agent-home:

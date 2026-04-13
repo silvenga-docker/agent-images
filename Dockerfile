@@ -84,7 +84,14 @@ RUN curl -L -O https://github.com/anomalyco/opencode/releases/download/v${OPENCO
 COPY rootfs/ /
 RUN chmod +x /usr/local/bin/agent-setup.sh \
     && mkdir -p /run /var/run \
-    && chown -R agent:agent /run /var/run /etc/s6-overlay
+    && chown -R agent:agent /run \
+    && chown -R agent:agent /var/run \
+    && chown -R agent:agent /command \
+    && chown -R agent:agent /package \
+    && chown -R agent:agent /etc/s6-overlay
+
+# Ensure no setuid/setgid bits are set.
+RUN find / -perm /6000 -type f -exec chmod a-s {} \; 2>/dev/null || true
 
 LABEL org.opencontainers.image.authors="Mark Lopez <m@silvenga.com>" \
     org.opencontainers.image.source="https://github.com/silvenga-docker/agent-images"
