@@ -24,6 +24,27 @@ RUN set -xe \
     libssl-dev \
     ripgrep \
     fd-find \
+    # 7zz
+    && wget ${URL_7Z} -O 7z.tar.xz \
+    && tar xvf 7z.tar.xz -C /tmp/ \
+    && install /tmp/7zz /usr/bin/7zz \
+    && install /tmp/7zz /usr/bin/7z \
+    && rm 7z.tar.xz \
+    # Init
+    && wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz -O s6-overlay-noarch.tar.xz \
+    && wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz -O s6-overlay-x86_64.tar.xz \
+    && tar -C / -Jxpf s6-overlay-noarch.tar.xz \
+    && tar -C / -Jxpf s6-overlay-x86_64.tar.xz \
+    && rm s6-overlay-noarch.tar.xz \
+    && rm s6-overlay-x86_64.tar.xz \
+    # Cleanup
+    && apt-get purge -y apt-transport-https \
+    && apt-get autoremove -y --purge \
+    && apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
+
+RUN set -xe \
+    && apt-get update \
+    && apt-get dist-upgrade -y \
     # Rust build deps
     cmake \
     clang \
@@ -49,23 +70,12 @@ RUN set -xe \
     socat \
     # Proxying \
     proxychains4 \
-    # 7zz
-    && wget ${URL_7Z} -O 7z.tar.xz \
-    && tar xvf 7z.tar.xz -C /tmp/ \
-    && install /tmp/7zz /usr/bin/7zz \
-    && install /tmp/7zz /usr/bin/7z \
-    && rm 7z.tar.xz \
-    # Init
-    && wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz -O s6-overlay-noarch.tar.xz \
-    && wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz -O s6-overlay-x86_64.tar.xz \
-    && tar -C / -Jxpf s6-overlay-noarch.tar.xz \
-    && tar -C / -Jxpf s6-overlay-x86_64.tar.xz \
-    && rm s6-overlay-noarch.tar.xz \
-    && rm s6-overlay-x86_64.tar.xz \
     # Cleanup
     && apt-get purge -y apt-transport-https \
     && apt-get autoremove -y --purge \
-    && apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
+    && apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin \
+    # Needed for tshark.
+    && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 
 RUN curl -fsSL https://bun.sh/install | bash \
     && install /root/.bun/bin/bun /usr/local/bin/bun \
