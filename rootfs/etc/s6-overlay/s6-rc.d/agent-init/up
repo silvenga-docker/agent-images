@@ -1,0 +1,4 @@
+#!/command/execlineb -P
+with-contenv
+cd /home/agent
+/usr/local/bin/agent-setup.sh

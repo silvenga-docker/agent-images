@@ -1,0 +1,14 @@
+services:
+  agent:
+    build: .
+    image: agent-image
+    container_name: agent
+    ports:
+      - "4096:4096"
+      - "3000:3000"
+    volumes:
+      - agent-home:/home/agent
+    restart: unless-stopped
+
+volumes:
+  agent-home:
