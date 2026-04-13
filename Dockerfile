@@ -66,7 +66,9 @@ RUN curl -L -O https://github.com/anomalyco/opencode/releases/download/v${OPENCO
     && rm opencode-linux-x64.tar.gz opencode
 
 COPY rootfs/ /
-RUN chmod +x /usr/local/bin/agent-setup.sh
+RUN chmod +x /usr/local/bin/agent-setup.sh \
+    && mkdir -p /run /var/run \
+    && chown -R agent:agent /run /var/run /etc/s6-overlay
 
 LABEL org.opencontainers.image.authors="Mark Lopez <m@silvenga.com>" \
     org.opencontainers.image.source="https://github.com/silvenga-docker/agent-images"
