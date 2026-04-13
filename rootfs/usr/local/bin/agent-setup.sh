@@ -1,26 +1,37 @@
 #!/usr/bin/env bash
 set -e
 
+: "${CARGO_HOME:?CARGO_HOME is unset or empty}"
+: "${NVM_DIR:?NVM_DIR is unset or empty}"
+: "${BUN_INSTALL:?BUN_INSTALL is unset or empty}"
+
 echo "Ensuring tools are installed for user $(id -un)..."
 
-# Install Cargo (Rustup) if missing
 if [ ! -d "$CARGO_HOME" ]; then
     echo "Installing Cargo/Rustup..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    RUSTUP_VERSION=1.29.0
+    RUSTUP_SHA256=4acc9acc76d5079515b46346a485974457b5a79893cfb01112423c89aeb5aa10
+    curl -fsSL "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" -o /tmp/rustup-init
+    echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum -c -
+    chmod +x /tmp/rustup-init
+    /tmp/rustup-init -y
+    rm /tmp/rustup-init
 else
     echo "Cargo/Rustup already installed."
 fi
 
-# Install nvm and node 20 if missing
 if [ ! -d "$NVM_DIR" ]; then
     echo "Installing nvm..."
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+    NVM_VERSION=v0.40.1
+    NVM_SHA256=abdb525ee9f5b48b34d8ed9fc67c6013fb0f659712e401ecd88ab989b3af8f53
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" -o /tmp/nvm-install.sh
+    echo "${NVM_SHA256}  /tmp/nvm-install.sh" | sha256sum -c -
+    bash /tmp/nvm-install.sh
+    rm /tmp/nvm-install.sh
 fi
 
-# Load nvm
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Install Node 20
 if ! nvm ls 20 >/dev/null 2>&1; then
     echo "Installing Node 20..."
     nvm install 20
@@ -29,6 +40,27 @@ nvm alias default 20
 nvm use default
 ln -sfn "$(dirname "$(dirname "$(nvm which default)")")" "$NVM_DIR/current"
 
-# Install OpenChamber
-echo "Ensuring OpenChamber is installed..."
-curl -fsSL https://raw.githubusercontent.com/btriapitsyn/openchamber/main/scripts/install.sh | bash
+if ! command -v openchamber >/dev/null 2>&1; then
+    echo "Installing OpenChamber..."
+    OPENCHAMBER_COMMIT=35f5d347cd5099ba0ab16d22edb89671544653c8
+    OPENCHAMBER_SHA256=aa268c96ddc6d7d53fc54d2e5c2312e689493ecef6ba4f69730a93d50cf33287
+    curl -fsSL "https://raw.githubusercontent.com/btriapitsyn/openchamber/${OPENCHAMBER_COMMIT}/scripts/install.sh" -o /tmp/openchamber-install.sh
+    echo "${OPENCHAMBER_SHA256}  /tmp/openchamber-install.sh" | sha256sum -c -
+    bash /tmp/openchamber-install.sh
+    rm /tmp/openchamber-install.sh
+else
+    echo "OpenChamber already installed."
+fi
+
+if [ ! -d "$BUN_INSTALL" ]; then
+    echo "Installing Bun..."
+    BUN_VERSION=1.1.20
+    BUN_SHA256=6cb70ad0349a2cecc94ab2113cd1d07a5779aae77c71cab1cf20c881ac0c0775
+    curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip" -o /tmp/bun-linux-x64.zip
+    echo "${BUN_SHA256}  /tmp/bun-linux-x64.zip" | sha256sum -c -
+    unzip -q /tmp/bun-linux-x64.zip -d /tmp/bun-extract
+    mkdir -p "${BUN_INSTALL}/bin"
+    mv /tmp/bun-extract/bun-linux-x64/bun "${BUN_INSTALL}/bin/bun"
+    ln -sf "${BUN_INSTALL}/bin/bun" "${BUN_INSTALL}/bin/bunx"
+    rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
+fi
