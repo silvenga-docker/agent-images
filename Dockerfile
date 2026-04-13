@@ -78,7 +78,7 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     BUN_INSTALL="/home/agent/.bun" \
     CARGO_HOME="/home/agent/.cargo" \
     NVM_DIR="/home/agent/.nvm" \
-    PATH="/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:${PATH}"
+    PATH="/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:/home/agent/.local/bin:${PATH}"
 
 USER agent
 WORKDIR /home/agent
