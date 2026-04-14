@@ -1,0 +1,41 @@
+name: "PR Validation"
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: agent-image:pr-test
+
+      - name: Start container
+        run: docker run -d --name agent-test --cap-drop ALL --cap-add SYS_PTRACE --cap-add NET_RAW --cap-add NET_ADMIN agent-image:pr-test
+
+      - name: Wait for container startup
+        run: sleep 5
+
+      - name: Verify container is still running
+        run: |
+          status=$(docker inspect -f '{{.State.Status}}' agent-test)
+          if [ "$status" != "running" ]; then
+            echo "::error::Container exited with status: $status"
+            docker logs agent-test
+            exit 1
+          fi
+          echo "Container is healthy (status: $status)"
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f agent-test || true
