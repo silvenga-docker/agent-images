@@ -40,18 +40,6 @@ nvm alias default 20
 nvm use default
 ln -sfn "$(dirname "$(dirname "$(nvm which default)")")" "$NVM_DIR/current"
 
-if ! command -v openchamber >/dev/null 2>&1; then
-    echo "Installing OpenChamber..."
-    OPENCHAMBER_COMMIT=35f5d347cd5099ba0ab16d22edb89671544653c8
-    OPENCHAMBER_SHA256=aa268c96ddc6d7d53fc54d2e5c2312e689493ecef6ba4f69730a93d50cf33287
-    curl -fsSL "https://raw.githubusercontent.com/btriapitsyn/openchamber/${OPENCHAMBER_COMMIT}/scripts/install.sh" -o /tmp/openchamber-install.sh
-    echo "${OPENCHAMBER_SHA256}  /tmp/openchamber-install.sh" | sha256sum -c -
-    bash /tmp/openchamber-install.sh
-    rm /tmp/openchamber-install.sh
-else
-    echo "OpenChamber already installed."
-fi
-
 if [ ! -d "$BUN_INSTALL" ]; then
     echo "Installing Bun..."
     BUN_VERSION=1.1.20
@@ -64,3 +52,7 @@ if [ ! -d "$BUN_INSTALL" ]; then
     ln -sf "${BUN_INSTALL}/bin/bun" "${BUN_INSTALL}/bin/bunx"
     rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
 fi
+
+# This has to happen after bun, since the install script is going to install openchamber as a bun package.
+echo "Installing OpenChamber..."
+bun add -g @openchamber/web@latest
