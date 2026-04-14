@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   validate:
@@ -21,30 +22,30 @@ jobs:
         with:
           context: .
           load: true
-          tags: agent-image:pr-test
+          tags: agent-image
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Start container
-        run: docker run -d --name agent-test --cap-drop ALL --cap-add SYS_PTRACE --cap-add NET_RAW --cap-add NET_ADMIN agent-image:pr-test
+        run: docker compose up -d
 
       - name: Wait for container startup
         run: sleep 5
 
       - name: Verify container is still running
         run: |
-          if ! status=$(docker inspect -f '{{.State.Status}}' agent-test 2>&1); then
+          if ! status=$(docker inspect -f '{{.State.Status}}' agent 2>&1); then
             echo "::error::Failed to inspect container: $status"
-            docker logs agent-test 2>/dev/null || true
+            docker compose logs 2>/dev/null || true
             exit 1
           fi
           if [ "$status" != "running" ]; then
             echo "::error::Container exited with status: $status"
-            docker logs agent-test
+            docker compose logs
             exit 1
           fi
           echo "Container is healthy (status: $status)"
 
       - name: Cleanup
         if: always()
-        run: docker rm -f agent-test || true
+        run: docker compose down || true
