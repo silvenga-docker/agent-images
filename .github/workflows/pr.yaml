@@ -4,6 +4,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -28,7 +31,11 @@ jobs:
 
       - name: Verify container is still running
         run: |
-          status=$(docker inspect -f '{{.State.Status}}' agent-test)
+          if ! status=$(docker inspect -f '{{.State.Status}}' agent-test 2>&1); then
+            echo "::error::Failed to inspect container: $status"
+            docker logs agent-test 2>/dev/null || true
+            exit 1
+          fi
           if [ "$status" != "running" ]; then
             echo "::error::Container exited with status: $status"
             docker logs agent-test
