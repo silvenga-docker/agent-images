@@ -22,6 +22,8 @@ jobs:
           context: .
           load: true
           tags: agent-image:pr-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Start container
         run: docker run -d --name agent-test --cap-drop ALL --cap-add SYS_PTRACE --cap-add NET_RAW --cap-add NET_ADMIN agent-image:pr-test
