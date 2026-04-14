@@ -65,6 +65,10 @@ This image defines a security boundary. All changes must preserve these invarian
 - Ports: `4096` (OpenCode), `3000` (OpenChamber).
 - `cap_drop: ALL` + selective `cap_add` is intentional. See security model above.
 
+### README Maintenance
+
+When packages or tools are added to (or removed from) the Dockerfile, update the "What's Inside" section of `README.md` to reflect the change.
+
 ## Conventions
 
 - LF line endings, spaces for indent, trailing newline (see `.editorconfig`).
