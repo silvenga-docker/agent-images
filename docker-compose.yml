@@ -17,8 +17,10 @@ services:
       - NET_ADMIN
     devices:
       - /dev/fuse
+      - /dev/net/tun
     security_opt:
       - label=disable
+      - seccomp=unconfined
 
 volumes:
   agent-home:
