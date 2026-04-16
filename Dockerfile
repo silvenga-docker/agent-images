@@ -7,6 +7,8 @@ ARG S6_OVERLAY_NOARCH_SHA256=85848f6baab49fb7832a5557644c73c066899ed458dd1601035
 ARG S6_OVERLAY_X86_64_SHA256=5a09e2f1878dc5f7f0211dd7bafed3eee1afe4f813e872fff2ab1957f266c7c0
 ARG OPENCODE_VERSION=1.4.3
 ARG OPENCODE_SHA256=34d503ebb029853293be6fd4d441bbb2dbb03919bfa4525e88b1ca55d68f3e17
+ARG DOCKER_COMPOSE_VERSION=v5.1.3
+ARG DOCKER_COMPOSE_SHA256=a0298760c9772d2c06888fc8703a487c94c3c3b0134adeef830742a2fc7647b4
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -28,6 +30,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ripgrep \
         fd-find \
         gnupg \
+        libcap2-bin \
         cmake \
         clang \
         lld \
@@ -47,6 +50,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         tcpdump \
         socat \
         proxychains4 \
+        catatonit \
+        fuse-overlayfs \
+        podman \
+        podman-docker \
+        slirp4netns \
+        uidmap \
     && curl -fsSL ${URL_7Z} -o /tmp/7z.tar.xz \
     && echo "${URL_7Z_SHA256}  /tmp/7z.tar.xz" | sha256sum -c - \
     && tar xf /tmp/7z.tar.xz -C /tmp/ \
@@ -65,15 +74,27 @@ RUN find / \( -path /proc -o -path /sys -o -path /dev \) -prune -o -perm /6000 -
     groupadd -g 1000 agent \
     && useradd -u 1000 -g 1000 -m -s /bin/bash agent \
     && chown -R agent:agent /home/agent \
+    && echo "agent:100000:65536" >> /etc/subuid \
+    && echo "agent:100000:65536" >> /etc/subgid \
     && curl -fsSL https://github.com/sst/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz -o /tmp/opencode.tar.gz \
     && echo "${OPENCODE_SHA256}  /tmp/opencode.tar.gz" | sha256sum -c - \
     && tar xf /tmp/opencode.tar.gz -C /tmp/ \
     && install /tmp/opencode /usr/local/bin/opencode \
     && rm /tmp/opencode.tar.gz /tmp/opencode
 
+RUN curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose \
+    && echo "${DOCKER_COMPOSE_SHA256}  /usr/local/bin/docker-compose" | sha256sum -c - \
+    && chmod +x /usr/local/bin/docker-compose \
+    && mkdir -p /usr/local/libexec/docker/cli-plugins \
+    && ln -s /usr/local/bin/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
+
 COPY rootfs/ /
 RUN chmod +x /usr/local/bin/agent-setup.sh \
+    && chmod +x /usr/local/bin/docker \
     && mkdir -p /run /var/run \
+    && mkdir -p /run/user/1000 \
+    && chown agent:agent /run/user/1000 \
+    && chmod 0700 /run/user/1000 \
     && chown -R agent:agent /run \
     && chown -R agent:agent /var/run \
     && chown -R agent:agent /etc/s6-overlay \
@@ -89,9 +110,13 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     BUN_INSTALL="/home/agent/.bun" \
     CARGO_HOME="/home/agent/.cargo" \
     NVM_DIR="/home/agent/.nvm" \
+    XDG_RUNTIME_DIR="/run/user/1000" \
+    DOCKER_HOST="unix:///run/user/1000/podman/podman.sock" \
     PATH="/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:/home/agent/.local/bin:${PATH}"
 
-RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
+RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
+    && setcap cap_setuid=eip /usr/bin/newuidmap \
+    && setcap cap_setgid=eip /usr/bin/newgidmap
 
 USER agent
 WORKDIR /home/agent
