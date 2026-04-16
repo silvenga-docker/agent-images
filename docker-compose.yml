@@ -15,6 +15,10 @@ services:
       - SYS_PTRACE
       - NET_RAW
       - NET_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - label=disable
 
 volumes:
   agent-home:
