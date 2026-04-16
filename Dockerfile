@@ -74,8 +74,6 @@ RUN find / \( -path /proc -o -path /sys -o -path /dev \) -prune -o -perm /6000 -
     groupadd -g 1000 agent \
     && useradd -u 1000 -g 1000 -m -s /bin/bash agent \
     && chown -R agent:agent /home/agent \
-    && echo "agent:100000:65536" >> /etc/subuid \
-    && echo "agent:100000:65536" >> /etc/subgid \
     && curl -fsSL https://github.com/sst/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz -o /tmp/opencode.tar.gz \
     && echo "${OPENCODE_SHA256}  /tmp/opencode.tar.gz" | sha256sum -c - \
     && tar xf /tmp/opencode.tar.gz -C /tmp/ \
