@@ -12,6 +12,7 @@ This is an opinionated agent container image for personal use in experimenting w
 - **Dev Tools**: Git, ripgrep, fd, jq, sqlite3, PostgreSQL client, Redis client.
 - **Network**: nmap, mtr, tshark, tcpdump, socat, proxychains4, dnsutils.
 - **Agent**: [OpenCode](https://github.com/anomalyco/opencode) pre-installed.
+- **Containers**: Rootless [Podman](https://podman.io/) with Docker CLI transparency (`docker`, `docker compose`, `docker-compose`).
 
 ## Usage
 
@@ -19,7 +20,13 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
+> **Note**: The compose file requires `/dev/fuse` device access and `security_opt: label=disable` for rootless Podman storage. See `docker-compose.yml`.
+
 The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent`, and drops all capabilities except `SYS_PTRACE`, `NET_RAW`, and `NET_ADMIN`.
+
+## Known Limitations
+
+- Inner container port mapping to the host is not supported (Docker networking limitation). Use shared volumes under `/home/agent` for data exchange.
 
 ## License
 
