@@ -8,7 +8,8 @@ services:
       - "3000:3000"
     volumes:
       - agent-home:/home/agent
-      - agent-containers-storage:/home/agent/.local/share/containers/storage # dedicated non-btrfs volume; required for native kernel overlayfs (btrfs does not support overlayfs)
+    tmpfs:
+      - /home/agent/.local/share/containers/storage:uid=1000,gid=1000,mode=0755 # tmpfs is required: the host disk is btrfs, kernel overlay does not support btrfs; tmpfs does support overlay
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -28,4 +29,3 @@ services:
 
 volumes:
   agent-home:
-  agent-containers-storage:

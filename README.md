@@ -31,6 +31,7 @@ Protection against kernel privilege-escalation exploits (e.g. namespace escape v
 ## Known Limitations
 
 - Inner container port mapping to the host is not supported (Docker networking limitation). Use shared volumes under `/home/agent` for data exchange.
+- Podman image cache (`~/.local/share/containers/storage`) is stored on a tmpfs and is not persisted across container restarts. Images must be re-pulled after each restart.
 
 ## License
 
