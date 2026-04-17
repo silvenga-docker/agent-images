@@ -54,6 +54,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         fuse-overlayfs \
         podman \
         podman-docker \
+        passt \
         slirp4netns \
         uidmap \
     && curl -fsSL ${URL_7Z} -o /tmp/7z.tar.xz \
@@ -89,6 +90,7 @@ RUN curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COM
 COPY rootfs/ /
 RUN chmod +x /usr/local/bin/agent-setup.sh \
     && chmod +x /usr/local/bin/docker \
+    && chmod +x /etc/s6-overlay/s6-rc.d/podman-socket/run \
     && mkdir -p /run /var/run \
     && mkdir -p /run/user/1000 \
     && chown agent:agent /run/user/1000 \
