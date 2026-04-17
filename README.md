@@ -20,9 +20,13 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
-> **Note**: The compose file requires `/dev/fuse` and `/dev/net/tun` device access, `SETUID`/`SETGID` capabilities (for `newuidmap`/`newgidmap` UID mapping), `security_opt: label=disable` (SELinux), and `security_opt: seccomp=unconfined` (user namespace creation for rootless Podman). See `docker-compose.yml`.
+The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent`, and drops all capabilities except `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, and `SETGID`. Each granted capability and disabled security feature is documented inline in `docker-compose.yml`.
 
-The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent`, and drops all capabilities except `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, and `SETGID`.
+## Security Posture
+
+All capabilities beyond the default Docker set are granted for specific, narrow purposes (rootless Podman UID mapping, network tooling, debuggers). The seccomp filter and SELinux labeling are disabled to support rootless container-in-container execution.
+
+Protection against kernel privilege-escalation exploits (e.g. namespace escape via 0-day) is explicitly out of scope. This image assumes a patched host kernel. If that assumption does not hold, run with an additional isolation layer (VM, gVisor, etc.).
 
 ## Known Limitations
 
