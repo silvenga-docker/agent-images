@@ -56,7 +56,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         passt \
         slirp4netns \
         uidmap \
-        btrfs-progs \
     && curl -fsSL ${URL_7Z} -o /tmp/7z.tar.xz \
     && echo "${URL_7Z_SHA256}  /tmp/7z.tar.xz" | sha256sum -c - \
     && tar xf /tmp/7z.tar.xz -C /tmp/ \
@@ -116,7 +115,8 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
 
 RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
     && setcap cap_setuid=eip /usr/bin/newuidmap \
-    && setcap cap_setgid=eip /usr/bin/newgidmap
+    && setcap cap_setgid=eip /usr/bin/newgidmap \
+    && setcap cap_sys_chroot=eip /usr/bin/podman
 
 USER agent
 WORKDIR /home/agent

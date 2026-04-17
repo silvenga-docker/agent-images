@@ -17,6 +17,8 @@ services:
       - NET_ADMIN    # required for network interface configuration (tshark, proxychains)
       - SETUID       # required for newuidmap to set up rootless Podman UID mappings
       - SETGID       # required for newgidmap to set up rootless Podman GID mappings
+      - SYS_CHROOT   # required for rootless Podman layer extraction: triggers realChroot() in
+                     # containers/storage, bypassing MakeRPrivate("/") which fails on locked Docker mounts
     devices:
       - /dev/net/tun # required for pasta (rootless Podman network backend)
     security_opt:

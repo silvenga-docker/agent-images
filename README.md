@@ -20,7 +20,7 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
-The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent`, and drops all capabilities except `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, and `SETGID`. Each granted capability and disabled security feature is documented inline in `docker-compose.yml`.
+The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent`, and drops all capabilities except `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, `SETGID`, and `SYS_CHROOT`. Each granted capability and disabled security feature is documented inline in `docker-compose.yml`.
 
 ## Security Posture
 
