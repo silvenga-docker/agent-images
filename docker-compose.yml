@@ -12,13 +12,17 @@ services:
     cap_drop:
       - ALL
     cap_add:
-      - SYS_PTRACE
-      - NET_RAW
-      - NET_ADMIN
+      - SYS_PTRACE   # required for debuggers (gdb, strace) and some profilers
+      - NET_RAW      # required for raw socket tools (ping, nmap, tcpdump)
+      - NET_ADMIN    # required for network interface configuration (tshark, proxychains)
+      - SETUID       # required for newuidmap to set up rootless Podman UID mappings
+      - SETGID       # required for newgidmap to set up rootless Podman GID mappings
     devices:
-      - /dev/fuse
+      - /dev/fuse    # required for fuse-overlayfs (rootless Podman container storage)
+      - /dev/net/tun # required for pasta (rootless Podman network backend)
     security_opt:
-      - label=disable
+      - label=disable      # disables SELinux labeling; rootless Podman bind-mounts conflict with SELinux policy
+      - seccomp=unconfined # disables seccomp filter; clone(CLONE_NEWUSER) is blocked by Docker's default profile
 
 volumes:
   agent-home:

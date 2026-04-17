@@ -26,11 +26,15 @@ rootfs/                 # Files overlaid onto the image at build
 
 This image defines a security boundary. All changes must preserve these invariants:
 
+### Scope
+
+Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope**. The threat model assumes a patched host kernel. If that assumption does not hold, add an external isolation layer (VM, gVisor, etc.) — that is not this image's responsibility.
+
 ### Hard Rules
 
 - **Non-root**: Container runs as `USER agent` (uid 1000). Never add `USER root` or switch users.
 - **No setuid/setgid**: All suid/sgid bits are stripped at build (`find / -perm /6000 ... chmod a-s`). Never reintroduce them.
-- **Minimal capabilities**: Compose drops ALL caps, adds back only `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`. Never add `SYS_ADMIN`, `DAC_OVERRIDE`, or other privilege-escalating caps.
+- **Minimal capabilities**: Compose drops ALL caps, adds back only `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, `SETGID`. `SETUID`/`SETGID` are required for rootless Podman (`newuidmap`/`newgidmap`). Never add `SYS_ADMIN`, `DAC_OVERRIDE`, or other privilege-escalating caps.
 - **No sudo**: No sudo/doas/su is installed. Never add root escalation mechanisms.
 - **TLS-only downloads**: Use `https://` for all fetched URLs. Use `--proto '=https' --tlsv1.2` for curl where supported.
 - **No secrets in image**: Never bake API keys, tokens, or credentials into the Dockerfile or rootfs.
@@ -64,6 +68,7 @@ This image defines a security boundary. All changes must preserve these invarian
 
 - Ports: `4096` (OpenCode), `3000` (OpenChamber).
 - `cap_drop: ALL` + selective `cap_add` is intentional. See security model above.
+- Each `cap_add`, `devices` entry, and `security_opt` has an inline comment explaining its purpose. Keep these comments accurate when making changes.
 
 ### README Maintenance
 
