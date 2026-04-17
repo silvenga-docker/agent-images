@@ -19,6 +19,8 @@ services:
       - SETGID       # required for newgidmap to set up rootless Podman GID mappings
       - SYS_CHROOT   # required for rootless Podman layer extraction: triggers realChroot() in
                      # containers/storage, bypassing MakeRPrivate("/") which fails on locked Docker mounts
+      - DAC_OVERRIDE # required for newuidmap/newgidmap to open /proc/<pid>/uid_map when it is owned
+                     # by uid 0 (occurs when CLONE_NEWUSER+CLONE_NEWNS are combined by rootless Podman)
     devices:
       - /dev/net/tun # required for pasta (rootless Podman network backend)
     security_opt:
