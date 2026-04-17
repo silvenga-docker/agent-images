@@ -75,7 +75,6 @@ RUN find / \( -path /proc -o -path /sys -o -path /dev \) -prune -o -perm /6000 -
     groupadd -g 1000 agent \
     && useradd -u 1000 -g 1000 -m -s /bin/bash agent \
     && chown -R agent:agent /home/agent \
-    && install -d -o agent -g agent /home/agent/.local/share/containers/storage/overlay \
     && curl -fsSL https://github.com/sst/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz -o /tmp/opencode.tar.gz \
     && echo "${OPENCODE_SHA256}  /tmp/opencode.tar.gz" | sha256sum -c - \
     && tar xf /tmp/opencode.tar.gz -C /tmp/ \
