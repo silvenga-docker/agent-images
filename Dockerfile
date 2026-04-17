@@ -56,6 +56,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         passt \
         slirp4netns \
         uidmap \
+        btrfs-progs \
     && curl -fsSL ${URL_7Z} -o /tmp/7z.tar.xz \
     && echo "${URL_7Z_SHA256}  /tmp/7z.tar.xz" | sha256sum -c - \
     && tar xf /tmp/7z.tar.xz -C /tmp/ \
