@@ -114,8 +114,8 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     PATH="/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:/home/agent/.local/bin:${PATH}"
 
 RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
-    && setcap cap_setuid=eip /usr/bin/newuidmap \
-    && setcap cap_setgid=eip /usr/bin/newgidmap \
+    && setcap cap_setuid,cap_dac_override=eip /usr/bin/newuidmap \
+    && setcap cap_setgid,cap_dac_override=eip /usr/bin/newgidmap \
     && setcap cap_sys_chroot=eip /usr/bin/podman
 
 USER agent
