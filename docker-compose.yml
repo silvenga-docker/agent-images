@@ -15,10 +15,14 @@ services:
       - SYS_PTRACE
       - NET_RAW
       - NET_ADMIN
+      - SETUID
+      - SETGID
     devices:
       - /dev/fuse
+      - /dev/net/tun
     security_opt:
       - label=disable
+      - seccomp=unconfined
 
 volumes:
   agent-home:
