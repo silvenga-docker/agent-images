@@ -74,6 +74,7 @@ RUN find / \( -path /proc -o -path /sys -o -path /dev \) -prune -o -perm /6000 -
     groupadd -g 1000 agent \
     && useradd -u 1000 -g 1000 -m -s /bin/bash agent \
     && chown -R agent:agent /home/agent \
+    && install -d -o agent -g agent /home/agent/.local/share/containers/storage \
     && curl -fsSL https://github.com/sst/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz -o /tmp/opencode.tar.gz \
     && echo "${OPENCODE_SHA256}  /tmp/opencode.tar.gz" | sha256sum -c - \
     && tar xf /tmp/opencode.tar.gz -C /tmp/ \
@@ -115,8 +116,7 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
 
 RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
     && setcap cap_setuid,cap_dac_override=eip /usr/bin/newuidmap \
-    && setcap cap_setgid,cap_dac_override=eip /usr/bin/newgidmap \
-    && setcap cap_sys_chroot=eip /usr/bin/podman
+    && setcap cap_setgid,cap_dac_override=eip /usr/bin/newgidmap
 
 USER agent
 WORKDIR /home/agent

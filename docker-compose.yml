@@ -8,6 +8,7 @@ services:
       - "3000:3000"
     volumes:
       - agent-home:/home/agent
+      - agent-containers-storage:/home/agent/.local/share/containers/storage # dedicated non-btrfs volume; required for native kernel overlayfs (btrfs does not support overlayfs)
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -17,8 +18,6 @@ services:
       - NET_ADMIN    # required for network interface configuration (tshark, proxychains)
       - SETUID       # required for newuidmap to set up rootless Podman UID mappings
       - SETGID       # required for newgidmap to set up rootless Podman GID mappings
-      - SYS_CHROOT   # required for rootless Podman layer extraction: triggers realChroot() in
-                     # containers/storage, bypassing MakeRPrivate("/") which fails on locked Docker mounts
       - DAC_OVERRIDE # required for newuidmap/newgidmap to open /proc/<pid>/uid_map when it is owned
                      # by uid 0 (occurs when CLONE_NEWUSER+CLONE_NEWNS are combined by rootless Podman)
     devices:
@@ -29,3 +28,4 @@ services:
 
 volumes:
   agent-home:
+  agent-containers-storage:
