@@ -51,7 +51,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         socat \
         proxychains4 \
         catatonit \
-        fuse-overlayfs \
         podman \
         podman-docker \
         passt \
