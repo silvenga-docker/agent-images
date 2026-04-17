@@ -53,6 +53,20 @@ if [ ! -d "$BUN_INSTALL" ]; then
     rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
 fi
 
+# If the configured storage driver doesn't match what Podman's libpod database recorded, the database
+# wins and overrides storage.conf — causing a startup failure. Clear stale storage so Podman reinitializes.
+CONFIGURED_DRIVER=$(awk -F'"' '/^driver/{print $2}' /etc/containers/storage.conf 2>/dev/null || true)
+STORAGE_DIR="${HOME}/.local/share/containers/storage"
+DB_DRIVER_FILE="${STORAGE_DIR}/db.sql"
+if [ -n "$CONFIGURED_DRIVER" ] && [ -d "$STORAGE_DIR" ]; then
+    # libpod records the driver in its bolt/sqlite db; the overlay dir existing when vfs is configured
+    # is a reliable proxy for a mismatch from a previous overlay-based deployment.
+    if [ "$CONFIGURED_DRIVER" = "vfs" ] && [ -d "${STORAGE_DIR}/overlay" ]; then
+        echo "Detected stale overlay storage with vfs driver configured — clearing container storage..."
+        rm -rf "$STORAGE_DIR"
+    fi
+fi
+
 # This has to happen after bun, since the install script is going to install openchamber as a bun package.
 echo "Installing OpenChamber..."
 bun add -g @openchamber/web@latest
