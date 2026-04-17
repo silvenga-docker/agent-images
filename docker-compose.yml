@@ -8,6 +8,7 @@ services:
       - "3000:3000"
     volumes:
       - agent-home:/home/agent
+      - agent-containers-storage:/home/agent/.local/share/containers/storage # must be a dedicated mountpoint; containers/storage self-bind-mounts this path during init, which requires CAP_SYS_ADMIN unless already a mountpoint
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -26,3 +27,4 @@ services:
 
 volumes:
   agent-home:
+  agent-containers-storage:
