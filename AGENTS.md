@@ -61,6 +61,7 @@ Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sys
 - s6 service files use execlineb syntax. Service types: `oneshot` (run-once) or `longrun` (daemon).
 - Dependencies between services are declared via empty files in `dependencies.d/`.
 - Services are registered in `user/contents.d/`.
+- **Agent services must set `HOME` and `cd`**: Any service or script that runs as `agent` via `s6-setuidgid` must explicitly set `export HOME /home/agent` (before `s6-setuidgid`) and `cd /home/agent`. `s6-setuidgid` drops the uid but does not update `HOME`, so without this tools like rustup, cargo, and nvm will attempt to write to `/root` and fail.
 
 ### docker-compose.yml
 
