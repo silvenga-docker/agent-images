@@ -1,0 +1,5 @@
+#!/bin/bash
+# $1 = exit code; 256 = intentional takedown, not a crash
+[ "${1}" -eq 256 ] && exit 0
+echo "dockerd crashed (exit ${1}), halting container..."
+exec s6-svscanctl -t /run/s6/service

@@ -9,7 +9,6 @@ services:
     volumes:
       - agent-home:/home/agent
       - docker-data:/var/lib/docker
-    restart: unless-stopped
     # runtime: sysbox-runc  # Enable when running with Sysbox for full VM-like isolation
 
 volumes:
