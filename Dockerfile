@@ -10,7 +10,16 @@ ARG S6_OVERLAY_X86_64_SHA256=5a09e2f1878dc5f7f0211dd7bafed3eee1afe4f813e872fff2a
 ARG OPENCODE_VERSION=1.4.3
 ARG OPENCODE_SHA256=34d503ebb029853293be6fd4d441bbb2dbb03919bfa4525e88b1ca55d68f3e17
 
-RUN set -xe \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -xe \
+    set -xe \
+    && apt-get update \
+    && apt-get dist-upgrade -y \
+    && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    xz-utils \
     && curl -fsSL ${URL_7Z} -o /tmp/7z.tar.xz \
     && echo "${URL_7Z_SHA256}  /tmp/7z.tar.xz" | sha256sum -c - \
     && tar xf /tmp/7z.tar.xz -C /tmp/ \
@@ -28,17 +37,13 @@ RUN set -xe \
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -xe \
-    && apt-get update \
-    && apt-get dist-upgrade -y \
     && install -m 0755 -d /etc/apt/keyrings \
     && curl --proto '=https' --tlsv1.2 -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
     && chmod a+r /etc/apt/keyrings/docker.asc \
     && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian trixie stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
-    xz-utils \
     bash \
-    ca-certificates \
-    curl \
     git \
     less \
     openssh-client \
@@ -80,12 +85,7 @@ RUN groupadd -g 1000 agent \
     && useradd -u 1000 -g 1000 -m -s /bin/bash agent \
     && usermod -aG docker agent \
     && chmod +x /usr/local/bin/agent-setup.sh \
-    && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
-    && curl -fsSL https://github.com/sst/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz -o /tmp/opencode.tar.gz \
-    && echo "${OPENCODE_SHA256}  /tmp/opencode.tar.gz" | sha256sum -c - \
-    && tar xf /tmp/opencode.tar.gz -C /tmp/ \
-    && install /tmp/opencode /usr/local/bin/opencode \
-    && rm /tmp/opencode.tar.gz /tmp/opencode
+    && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_KEEP_ENV=1 \

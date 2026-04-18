@@ -53,6 +53,10 @@ if [ ! -d "$BUN_INSTALL" ]; then
     rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
 fi
 
-echo "Installing OpenChamber..."
+echo "Installing/Upgrading OpenCode..."
+bun add -g opencode-ai@latest --no-summary
+bun update -g --latest opencode-ai@latest
+
+echo "Installing/Upgrading OpenChamber..."
 bun add -g @openchamber/web@latest --no-summary
 bun update -g --latest @openchamber/web@latest
