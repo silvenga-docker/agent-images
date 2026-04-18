@@ -1,4 +1,2 @@
 #!/bin/bash
-[ "${1}" -eq 256 ] && exit 0
-echo "opencode crashed (exit ${1}), halting container..."
-exec /command/s6-svscanctl -t /run/s6/service
+exec /run/s6/basedir/bin/halt

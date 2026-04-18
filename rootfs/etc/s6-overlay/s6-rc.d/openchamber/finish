@@ -1,5 +1,2 @@
 #!/bin/bash
-/command/s6-setuidgid agent openchamber stop 2>/dev/null || true
-[ "${1}" -eq 256 ] && exit 0
-echo "openchamber crashed (exit ${1}), halting container..."
-exec /command/s6-svscanctl -t /run/s6/service
+exec /run/s6/basedir/bin/halt
