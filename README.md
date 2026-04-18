@@ -20,7 +20,7 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
-The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent` and a separate Docker image cache volume at `/var/lib/docker`. To enable full VM-like isolation, uncomment the `runtime: sysbox-runc` line in `docker-compose.yml`.
+The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent` and a separate Docker image cache volume at `/var/lib/docker`. By default it runs with `privileged: true` to allow Docker-in-Docker. When running under [Sysbox](https://github.com/nestybox/sysbox), replace `privileged: true` with `runtime: sysbox-runc` in `docker-compose.yml`.
 
 ## Security Posture
 

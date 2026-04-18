@@ -42,7 +42,7 @@ Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sys
 - **System packages** (apt): Add to the Dockerfile only. Group related packages. Clean up apt caches in the same RUN layer.
 - **User-space tools** (cargo/npm/pip/bun): Add to `agent-setup.sh` for tools needed at runtime. These install into the persistent volume under `/home/agent`.
 - Prefer official package registries (apt, crates.io, npmjs, PyPI). Curl-pipe-bash installs are acceptable only from well-known installers (rustup, nvm) and must use HTTPS.
-- Pin versions for reproducibility (ARG in Dockerfile, explicit version in agent-setup.sh).
+- Do not pin apt package versions — apt verifies integrity via GPG and always pulls the latest stable release. Only pin versions for non-apt tools (rustup, nvm, bun, opencode) where a SHA256 hash is used for verification.
 
 ## Editing Guidelines
 
@@ -51,7 +51,7 @@ Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sys
 - Each `RUN` block groups related installs. Preserve this structure.
 - Minimize total layers, but split large apt-install layers into logical groups — Docker pulls layers concurrently, so multiple moderate layers download faster than one massive layer.
 - Always end with apt cache cleanup: `apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin`
-- Bump versions via ARGs at top of file.
+- Use ARGs at top of file for non-apt tool versions (opencode, s6-overlay, etc.) that are SHA256-verified.
 - If a package needs special capabilities (like `dumpcap`), grant them via `setcap` — never via setuid.
 - Test: the agent likely lacks Docker access. CI validates builds on PRs against `master`.
 
@@ -66,7 +66,7 @@ Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sys
 ### docker-compose.yml
 
 - Ports: `4096` (OpenCode), `3000` (OpenChamber).
-- Sysbox runtime is configured as a comment (`# runtime: sysbox-runc`). Enable it when running with Sysbox.
+- `privileged: true` is set for Docker-in-Docker to work under the default runtime. When running with Sysbox, replace `privileged: true` with `runtime: sysbox-runc` (already present as a comment).
 - The `docker-data` volume at `/var/lib/docker` is separate from `/home/agent` — Docker image cache persists independently of agent updates.
 
 ### README Maintenance
