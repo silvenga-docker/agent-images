@@ -9,7 +9,8 @@ services:
     volumes:
       - agent-home:/home/agent
       - docker-data:/var/lib/docker
-    # runtime: sysbox-runc  # Enable when running with Sysbox for full VM-like isolation
+    privileged: true
+    # runtime: sysbox-runc  # Enable when running with Sysbox; replace privileged: true
 
 volumes:
   agent-home:

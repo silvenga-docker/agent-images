@@ -72,7 +72,6 @@ RUN install -m 0755 -d /etc/apt/keyrings \
         docker-ce \
         docker-ce-cli \
         docker-compose-plugin \
-        fuse-overlayfs \
     && apt-get -q clean -y \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f /var/cache/apt/*.bin
