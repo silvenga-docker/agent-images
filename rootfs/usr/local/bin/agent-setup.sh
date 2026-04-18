@@ -53,6 +53,6 @@ if [ ! -d "$BUN_INSTALL" ]; then
     rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
 fi
 
-# This has to happen after bun, since the install script is going to install openchamber as a bun package.
 echo "Installing OpenChamber..."
-bun add -g @openchamber/web@latest
+bun add -g @openchamber/web@latest --no-summary
+bun update -g --latest @openchamber/web@latest
