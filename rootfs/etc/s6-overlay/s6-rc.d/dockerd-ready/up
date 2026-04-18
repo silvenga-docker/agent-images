@@ -1,0 +1,3 @@
+#!/command/execlineb -P
+with-contenv
+/bin/bash -c "for i in $(seq 1 30); do [ -S /var/run/docker.sock ] && exit 0; sleep 1; done; exit 1"

@@ -6,13 +6,13 @@ This is an opinionated agent container image for personal use in experimenting w
 
 ## What's Inside
 
-- **Base**: Debian Trixie (slim), running rootless under an unprivileged `agent` user.
+- **Base**: Debian Trixie (slim), running under Sysbox with Docker-in-Docker support.
 - **Init**: [s6-overlay](https://github.com/just-containers/s6-overlay) for process supervision.
 - **Runtimes**: Python 3, Bun, plus Rust build toolchain (cmake, clang, lld).
 - **Dev Tools**: Git, ripgrep, fd, jq, sqlite3, PostgreSQL client, Redis client.
 - **Network**: nmap, mtr, tshark, tcpdump, socat, proxychains4, dnsutils.
 - **Agent**: [OpenCode](https://github.com/anomalyco/opencode) pre-installed.
-- **Containers**: Rootless [Podman](https://podman.io/) with Docker CLI transparency (`docker`, `docker compose`, `docker-compose`).
+- **Containers**: Docker CE (`docker`, `docker compose`) via the official Docker apt repository.
 
 ## Usage
 
@@ -20,13 +20,13 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
-The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent`, and drops all capabilities except `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, `SETGID`, and `DAC_OVERRIDE`. Each granted capability and disabled security feature is documented inline in `docker-compose.yml`.
+The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent` and a separate Docker image cache volume at `/var/lib/docker`. To enable full VM-like isolation, uncomment the `runtime: sysbox-runc` line in `docker-compose.yml`.
 
 ## Security Posture
 
-All capabilities beyond the default Docker set are granted for specific, narrow purposes (rootless Podman UID mapping, network tooling, debuggers). The seccomp filter and SELinux labeling are disabled to support rootless container-in-container execution.
+This image is designed to run under the [Sysbox](https://github.com/nestybox/sysbox) container runtime, which provides VM-like isolation. The Docker daemon runs as root inside the container; application services (opencode, openchamber) run as the unprivileged `agent` user (uid 1000) via `s6-setuidgid`.
 
-Protection against kernel privilege-escalation exploits (e.g. namespace escape via 0-day) is explicitly out of scope. This image assumes a patched host kernel. If that assumption does not hold, run with an additional isolation layer (VM, gVisor, etc.).
+Sysbox runtime 0-day exploits are out of scope. No additional capability grants, seccomp overrides, or SELinux workarounds are needed when running under Sysbox.
 
 ## Known Limitations
 

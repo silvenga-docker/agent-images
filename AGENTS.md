@@ -17,9 +17,9 @@ rootfs/                 # Files overlaid onto the image at build
 
 - **Base**: Debian trixie-slim
 - **Init**: s6-overlay manages services
-- **User**: `agent` (uid 1000, non-root)
+- **User**: Container runs as root; application services (opencode, openchamber, agent-init) run as `agent` (uid 1000) via `s6-setuidgid`
 - **Volume**: `/home/agent` is a persistent volume
-- **Services** (s6 boot order): `agent-init` (oneshot) → `opencode` (longrun, :4096) → `openchamber` (longrun, :3000)
+- **Services** (s6 boot order): `agent-init` (oneshot) → `dockerd` (longrun) → `dockerd-ready` (oneshot) → `opencode` (longrun, :4096) → `openchamber` (longrun, :3000)
 - **External deps**: [OpenCode](https://github.com/anomalyco/opencode), [OpenChamber](https://github.com/btriapitsyn/openchamber) — pinned by version in Dockerfile/agent-setup.sh
 
 ## Security Model — HIGH SENSITIVITY
@@ -28,14 +28,12 @@ This image defines a security boundary. All changes must preserve these invarian
 
 ### Scope
 
-Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope**. The threat model assumes a patched host kernel. If that assumption does not hold, add an external isolation layer (VM, gVisor, etc.) — that is not this image's responsibility.
+Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sysbox provides VM-like isolation. This image is designed to run under the Sysbox runtime.
 
 ### Hard Rules
 
-- **Non-root**: Container runs as `USER agent` (uid 1000). Never add `USER root` or switch users.
-- **No setuid/setgid**: All suid/sgid bits are stripped at build (`find / -perm /6000 ... chmod a-s`). Never reintroduce them.
-- **Minimal capabilities**: Compose drops ALL caps, adds back only `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, `SETGID`. `SETUID`/`SETGID` are required for rootless Podman (`newuidmap`/`newgidmap`). Never add `SYS_ADMIN`, `DAC_OVERRIDE`, or other privilege-escalating caps.
-- **No sudo**: No sudo/doas/su is installed. Never add root escalation mechanisms.
+- **Non-root services**: Container runs as root for dockerd; opencode, openchamber, and agent-init drop to `agent` (uid 1000) via `s6-setuidgid`. Never install sudo/doas/su.
+- **No privilege escalation**: Never add sudo, doas, su, or any root-escalation mechanism.
 - **TLS-only downloads**: Use `https://` for all fetched URLs. Use `--proto '=https' --tlsv1.2` for curl where supported.
 - **No secrets in image**: Never bake API keys, tokens, or credentials into the Dockerfile or rootfs.
 
@@ -67,8 +65,8 @@ Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope
 ### docker-compose.yml
 
 - Ports: `4096` (OpenCode), `3000` (OpenChamber).
-- `cap_drop: ALL` + selective `cap_add` is intentional. See security model above.
-- Each `cap_add`, `devices` entry, and `security_opt` has an inline comment explaining its purpose. Keep these comments accurate when making changes.
+- Sysbox runtime is configured as a comment (`# runtime: sysbox-runc`). Enable it when running with Sysbox.
+- The `docker-data` volume at `/var/lib/docker` is separate from `/home/agent` — Docker image cache persists independently of agent updates.
 
 ### README Maintenance
 
@@ -90,6 +88,7 @@ The built image includes these pre-installed tools (relevant for understanding w
 - **CLI**: git, curl, wget, jq, ripgrep, fd-find, sqlite3, unzip, 7zip, gnupg, less
 - **Data**: postgresql-client, redis-tools
 - **Network**: openssh-client, nmap, tshark, tcpdump, socat, mtr-tiny, dnsutils, whois, proxychains4
+- **Containers**: Docker CE (`docker`, `docker compose`) — Docker daemon runs as root, agent user has CLI access via docker group
 
 Check existing packages before adding duplicates.
 
