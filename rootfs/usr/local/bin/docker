@@ -1,8 +1,0 @@
-#!/bin/bash
-# Wrapper: intercept 'docker compose' and delegate to standalone docker-compose.
-# Everything else passes through to podman (via podman-docker transparency).
-if [ "$1" = "compose" ]; then
-    shift
-    exec /usr/local/bin/docker-compose "$@"
-fi
-exec /usr/bin/podman "$@"

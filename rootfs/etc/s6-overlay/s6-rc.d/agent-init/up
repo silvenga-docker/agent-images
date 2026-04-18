@@ -1,4 +1,6 @@
 #!/command/execlineb -P
 with-contenv
+export HOME /home/agent
+s6-setuidgid agent
 cd /home/agent
 /usr/local/bin/agent-setup.sh

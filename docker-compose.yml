@@ -8,24 +8,10 @@ services:
       - "3000:3000"
     volumes:
       - agent-home:/home/agent
-      - agent-containers-storage:/home/agent/.local/share/containers/storage # dedicated non-btrfs volume; required for native kernel overlayfs (btrfs does not support overlayfs)
-    restart: unless-stopped
-    cap_drop:
-      - ALL
-    cap_add:
-      - SYS_PTRACE   # required for debuggers (gdb, strace) and some profilers
-      - NET_RAW      # required for raw socket tools (ping, nmap, tcpdump)
-      - NET_ADMIN    # required for network interface configuration (tshark, proxychains)
-      - SETUID       # required for newuidmap to set up rootless Podman UID mappings
-      - SETGID       # required for newgidmap to set up rootless Podman GID mappings
-      - DAC_OVERRIDE # required for newuidmap/newgidmap to open /proc/<pid>/uid_map when it is owned
-                     # by uid 0 (occurs when CLONE_NEWUSER+CLONE_NEWNS are combined by rootless Podman)
-    devices:
-      - /dev/net/tun # required for pasta (rootless Podman network backend)
-    security_opt:
-      - label=disable      # disables SELinux labeling; rootless Podman bind-mounts conflict with SELinux policy
-      - seccomp=unconfined # disables seccomp filter; clone(CLONE_NEWUSER) is blocked by Docker's default profile
+      - docker-data:/var/lib/docker
+    privileged: true
+    # runtime: sysbox-runc  # Enable when running with Sysbox; replace privileged: true
 
 volumes:
   agent-home:
-  agent-containers-storage:
+  docker-data:

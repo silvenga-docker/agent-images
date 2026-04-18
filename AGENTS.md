@@ -17,9 +17,9 @@ rootfs/                 # Files overlaid onto the image at build
 
 - **Base**: Debian trixie-slim
 - **Init**: s6-overlay manages services
-- **User**: `agent` (uid 1000, non-root)
+- **User**: Container runs as root; application services (opencode, openchamber, agent-init) run as `agent` (uid 1000) via `s6-setuidgid`
 - **Volume**: `/home/agent` is a persistent volume
-- **Services** (s6 boot order): `agent-init` (oneshot) → `opencode` (longrun, :4096) → `openchamber` (longrun, :3000)
+- **Services** (s6 boot order): `agent-init` (oneshot) → `dockerd` (longrun) → `dockerd-ready` (oneshot) → `opencode` (longrun, :4096) → `openchamber` (longrun, :3000)
 - **External deps**: [OpenCode](https://github.com/anomalyco/opencode), [OpenChamber](https://github.com/btriapitsyn/openchamber) — pinned by version in Dockerfile/agent-setup.sh
 
 ## Security Model — HIGH SENSITIVITY
@@ -28,14 +28,12 @@ This image defines a security boundary. All changes must preserve these invarian
 
 ### Scope
 
-Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope**. The threat model assumes a patched host kernel. If that assumption does not hold, add an external isolation layer (VM, gVisor, etc.) — that is not this image's responsibility.
+Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sysbox provides VM-like isolation. This image is designed to run under the Sysbox runtime.
 
 ### Hard Rules
 
-- **Non-root**: Container runs as `USER agent` (uid 1000). Never add `USER root` or switch users.
-- **No setuid/setgid**: All suid/sgid bits are stripped at build (`find / -perm /6000 ... chmod a-s`). Never reintroduce them.
-- **Minimal capabilities**: Compose drops ALL caps, adds back only `SYS_PTRACE`, `NET_RAW`, `NET_ADMIN`, `SETUID`, `SETGID`. `SETUID`/`SETGID` are required for rootless Podman (`newuidmap`/`newgidmap`). Never add `SYS_ADMIN`, `DAC_OVERRIDE`, or other privilege-escalating caps.
-- **No sudo**: No sudo/doas/su is installed. Never add root escalation mechanisms.
+- **Non-root services**: Container runs as root for dockerd; opencode, openchamber, and agent-init drop to `agent` (uid 1000) via `s6-setuidgid`. Never install sudo/doas/su.
+- **No privilege escalation**: Never add sudo, doas, su, or any root-escalation mechanism.
 - **TLS-only downloads**: Use `https://` for all fetched URLs. Use `--proto '=https' --tlsv1.2` for curl where supported.
 - **No secrets in image**: Never bake API keys, tokens, or credentials into the Dockerfile or rootfs.
 
@@ -44,7 +42,7 @@ Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope
 - **System packages** (apt): Add to the Dockerfile only. Group related packages. Clean up apt caches in the same RUN layer.
 - **User-space tools** (cargo/npm/pip/bun): Add to `agent-setup.sh` for tools needed at runtime. These install into the persistent volume under `/home/agent`.
 - Prefer official package registries (apt, crates.io, npmjs, PyPI). Curl-pipe-bash installs are acceptable only from well-known installers (rustup, nvm) and must use HTTPS.
-- Pin versions for reproducibility (ARG in Dockerfile, explicit version in agent-setup.sh).
+- Do not pin apt package versions — apt verifies integrity via GPG and always pulls the latest stable release. Only pin versions for non-apt tools (rustup, nvm, bun, opencode) where a SHA256 hash is used for verification.
 
 ## Editing Guidelines
 
@@ -53,7 +51,7 @@ Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope
 - Each `RUN` block groups related installs. Preserve this structure.
 - Minimize total layers, but split large apt-install layers into logical groups — Docker pulls layers concurrently, so multiple moderate layers download faster than one massive layer.
 - Always end with apt cache cleanup: `apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin`
-- Bump versions via ARGs at top of file.
+- Use ARGs at top of file for non-apt tool versions (opencode, s6-overlay, etc.) that are SHA256-verified.
 - If a package needs special capabilities (like `dumpcap`), grant them via `setcap` — never via setuid.
 - Test: the agent likely lacks Docker access. CI validates builds on PRs against `master`.
 
@@ -63,12 +61,13 @@ Kernel privilege-escalation via 0-day (namespace escape, etc.) is **out of scope
 - s6 service files use execlineb syntax. Service types: `oneshot` (run-once) or `longrun` (daemon).
 - Dependencies between services are declared via empty files in `dependencies.d/`.
 - Services are registered in `user/contents.d/`.
+- **Agent services must set `HOME` and `cd`**: Any service or script that runs as `agent` via `s6-setuidgid` must explicitly set `export HOME /home/agent` (before `s6-setuidgid`) and `cd /home/agent`. `s6-setuidgid` drops the uid but does not update `HOME`, so without this tools like rustup, cargo, and nvm will attempt to write to `/root` and fail.
 
 ### docker-compose.yml
 
 - Ports: `4096` (OpenCode), `3000` (OpenChamber).
-- `cap_drop: ALL` + selective `cap_add` is intentional. See security model above.
-- Each `cap_add`, `devices` entry, and `security_opt` has an inline comment explaining its purpose. Keep these comments accurate when making changes.
+- `privileged: true` is set for Docker-in-Docker to work under the default runtime. When running with Sysbox, replace `privileged: true` with `runtime: sysbox-runc` (already present as a comment).
+- The `docker-data` volume at `/var/lib/docker` is separate from `/home/agent` — Docker image cache persists independently of agent updates.
 
 ### README Maintenance
 
@@ -90,6 +89,7 @@ The built image includes these pre-installed tools (relevant for understanding w
 - **CLI**: git, curl, wget, jq, ripgrep, fd-find, sqlite3, unzip, 7zip, gnupg, less
 - **Data**: postgresql-client, redis-tools
 - **Network**: openssh-client, nmap, tshark, tcpdump, socat, mtr-tiny, dnsutils, whois, proxychains4
+- **Containers**: Docker CE (`docker`, `docker compose`) — Docker daemon runs as root, agent user has CLI access via docker group
 
 Check existing packages before adding duplicates.
 
