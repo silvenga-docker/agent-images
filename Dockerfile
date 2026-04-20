@@ -74,6 +74,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     tcpdump \
     socat \
     proxychains4 \
+    bsdextrautils \
+    b3sum \
     containerd.io \
     docker-ce \
     docker-ce-cli \
