@@ -88,7 +88,6 @@ RUN groupadd -g 1000 agent \
     && usermod -aG docker agent \
     && chmod +x /usr/local/bin/agent-setup.sh \
     && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
-    && printf '.sisyphus/\n' > /etc/gitignore_global \
     && git config --system core.excludesFile /etc/gitignore_global
 
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \

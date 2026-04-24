@@ -1,0 +1,2 @@
+# Ignore the Sisyphus planning folder so agents cannot accidentally commit it.
+.sisyphus/
