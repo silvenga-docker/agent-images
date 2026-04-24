@@ -89,6 +89,9 @@ RUN groupadd -g 1000 agent \
     && chmod +x /usr/local/bin/agent-setup.sh \
     && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 
+RUN printf '.sisyphus/\n' > /etc/gitignore_global \
+    && git config --system core.excludesFile /etc/gitignore_global
+
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_KEEP_ENV=1 \
     PAGER=cat \
