@@ -8,7 +8,7 @@ This is an opinionated agent container image for personal use in experimenting w
 
 - **Base**: Debian Trixie (slim), running under Sysbox with Docker-in-Docker support.
 - **Init**: [s6-overlay](https://github.com/just-containers/s6-overlay) for process supervision.
-- **Runtimes**: Python 3, Bun, plus Rust build toolchain (cmake, clang, lld).
+- **Runtimes**: Python 3, Bun, Node 20 (via nvm), plus Rust build toolchain (cmake, clang, lld).
 - **Dev Tools**: Git, ripgrep, fd, jq, sqlite3, PostgreSQL client, Redis client.
 - **Network**: nmap, mtr, tshark, tcpdump, socat, proxychains4, dnsutils.
 - **Agent**: [OpenCode](https://github.com/anomalyco/opencode) pre-installed.
@@ -20,7 +20,7 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
-The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent` and a separate Docker image cache volume at `/var/lib/docker`. By default it runs with `privileged: true` to allow Docker-in-Docker. When running under [Sysbox](https://github.com/nestybox/sysbox), replace `privileged: true` with `runtime: sysbox-runc` in `docker-compose.yml`.
+The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent` and a separate Docker image cache volume at `/var/lib/docker`. `/tmp` is an anonymous Docker volume — content may survive container restarts but should be treated as ephemeral. Run `reboot` to halt the container (triggers a restart if Docker is configured with a restart policy). By default it runs with `privileged: true` to allow Docker-in-Docker. When running under [Sysbox](https://github.com/nestybox/sysbox), replace `privileged: true` with `runtime: sysbox-runc` in `docker-compose.yml`.
 
 ## Security Posture
 
