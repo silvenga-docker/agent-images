@@ -53,7 +53,7 @@ Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sys
 - Always end with apt cache cleanup: `apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin`
 - Use ARGs at top of file for non-apt tool versions (opencode, s6-overlay, etc.) that are SHA256-verified.
 - If a package needs special capabilities (like `dumpcap`), grant them via `setcap` — never via setuid.
-- Test: the agent likely lacks Docker access. CI validates builds on PRs against `master`.
+- Test: Docker is available inside the container. Use `docker build .` to validate Dockerfile changes. CI also validates builds on PRs against `master`.
 
 ### rootfs/
 
@@ -84,14 +84,16 @@ When packages or tools are added to (or removed from) the Dockerfile, update the
 
 The built image includes these pre-installed tools (relevant for understanding what's already available before adding new packages):
 
-- **Languages**: Python 3, Bun, Node 20 (via nvm), Rust/Cargo (via rustup)
+- **Languages**: Python 3 (with pip, pipx), Bun, Node 20 (via nvm), Rust/Cargo (via rustup)
 - **Build**: build-essential, cmake, clang, lld, pkg-config, libssl-dev, libclang-dev
-- **CLI**: git, curl, wget, jq, ripgrep, fd-find, sqlite3, unzip, 7zip, gnupg, less
+- **CLI**: git, curl, jq, ripgrep, fd-find, sqlite3, unzip, 7z, b3sum, bsdextrautils, gnupg, less
 - **Data**: postgresql-client, redis-tools
 - **Network**: openssh-client, nmap, tshark, tcpdump, socat, mtr-tiny, dnsutils, whois, proxychains4
 - **Containers**: Docker CE (`docker`, `docker compose`) — Docker daemon runs as root, agent user has CLI access via docker group
 
 Check existing packages before adding duplicates.
+
+> See `/IMAGES.md` inside the running container for the authoritative tool reference.
 
 ## Self-Installation of Tools
 

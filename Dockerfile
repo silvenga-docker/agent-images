@@ -90,6 +90,13 @@ RUN groupadd -g 1000 agent \
     && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
     && git config --system core.excludesFile /etc/gitignore_global
 
+# Keep rootfs/IMAGES.md in sync when adding or removing packages
+
+RUN printf '#include <signal.h>\nint main(void){kill(1,15);return 0;}' > /tmp/reboot.c \
+    && gcc -O2 -o /usr/local/bin/reboot /tmp/reboot.c \
+    && setcap cap_kill=eip /usr/local/bin/reboot \
+    && rm /tmp/reboot.c
+
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_KEEP_ENV=1 \
     PAGER=cat \
