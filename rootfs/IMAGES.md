@@ -23,10 +23,8 @@ You are running as `agent` (uid 1000) inside a Debian Trixie container.
 **Build**
 `gcc`, `g++`, `clang`, `lld`, `cmake`, `make`, `pkg-config`, `libssl-dev`, `libclang-dev`
 
-**System Runtimes**
-`python3`, `pip` (`python3-pip`), `pipx`
-
-**User-Space Runtimes** (persistent in `/home/agent`)
+**Runtimes** (user-space, persistent in `/home/agent`)
+- `python3`, `pip` (`python3-pip`), `pipx`
 - Rust / Cargo: `~/.cargo` — `cargo`, `rustc`, `rustup`
 - Node 20 / npm / npx: `~/.nvm/current/bin`
 - Bun: `~/.bun` — `bun`, `bunx`
