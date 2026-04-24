@@ -1,13 +1,13 @@
 # Agent Environment
 
-You are running as `agent` (uid 1000) inside a Debian Trixie container.
+Agent workloads (OpenCode, OpenChamber) run as `agent` (uid 1000) inside a Debian Trixie container. The container init (PID 1) and Docker daemon run as root — no escalation path to root is available.
 
 ## Constraints
 
 - **No root access.** sudo, su, and privilege escalation are not available.
 - **System files are ephemeral.** Changes to `/usr`, `/etc`, `/bin`, `/lib`, and other system paths are wiped when the image is rebuilt. Do not modify system directories.
 - **Persistent storage.** `/home/agent` is a persistent Docker volume; files here survive restarts and reboots.
-- **Temporary storage.** `/tmp` is a tmpfs; use it freely for scratch work. Contents are cleared on every restart.
+- **Temporary storage.** `/tmp` is available for scratch work. Contents may or may not survive container restarts — treat it as unreliable between runs. It is sized as a Docker volume (many GB), not memory-backed.
 
 ## Installed Tools
 
@@ -58,4 +58,4 @@ For other install locations, add to `~/.bashrc` and re-source.
 
 ## Restarting the Container
 
-Run `reboot` (or `/usr/local/bin/reboot`) to halt the container. If Docker is configured with a restart policy (`restart: always` or `restart: unless-stopped`), the container restarts automatically. **All `/tmp` contents are lost on restart.**
+Run `reboot` (or `/usr/local/bin/reboot`) to halt the container. If Docker is configured with a restart policy (`restart: always` or `restart: unless-stopped`), the container restarts automatically. Contents of `/tmp` may or may not persist across restarts.

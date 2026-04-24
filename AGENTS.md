@@ -71,7 +71,7 @@ Sysbox runtime 0-day exploits are **out of scope**. The threat model assumes Sys
 
 ### README Maintenance
 
-When packages or tools are added to (or removed from) the Dockerfile, update the "What's Inside" section of `README.md` to reflect the change.
+When packages or tools are added to (or removed from) the Dockerfile, update both the "What's Inside" section of `README.md` and `rootfs/IMAGES.md` to reflect the change.
 
 ## Conventions
 

@@ -9,8 +9,6 @@ services:
     volumes:
       - agent-home:/home/agent
       - docker-data:/var/lib/docker
-    tmpfs:
-      - /tmp
     privileged: true
     # runtime: sysbox-runc  # Enable when running with Sysbox; replace privileged: true
 
