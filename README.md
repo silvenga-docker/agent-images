@@ -21,6 +21,19 @@ This is an opinionated agent container image for personal use in experimenting w
 docker compose up -d
 ```
 
+## OpenCode Configuration
+
+Configure OpenCode to load the in-container tool reference by adding the following to your `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["/IMAGES.md"]
+}
+```
+
+This instructs OpenCode to include `/IMAGES.md` (the authoritative tool reference baked into the image) as context for every session.
+
 The compose file exposes ports `4096` and `3000`, mounts a persistent volume at `/home/agent` and a separate Docker image cache volume at `/var/lib/docker`. `/tmp` is an anonymous Docker volume — content may survive container restarts but should be treated as ephemeral. Run `reboot` to halt the container (triggers a restart if Docker is configured with a restart policy). By default it runs with `privileged: true` to allow Docker-in-Docker. When running under [Sysbox](https://github.com/nestybox/sysbox), replace `privileged: true` with `runtime: sysbox-runc` in `docker-compose.yml`.
 
 ## Security Posture
