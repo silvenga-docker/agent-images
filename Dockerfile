@@ -81,6 +81,17 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     docker-ce-cli \
     docker-compose-plugin
 
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    set -xe \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && curl --proto '=https' --tlsv1.2 -fsSL https://dl.google.com/linux/linux_signing_key.pub -o /etc/apt/keyrings/google-chrome.asc \
+    && chmod a+r /etc/apt/keyrings/google-chrome.asc \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.asc] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    google-chrome-stable
+
 COPY rootfs/ /
 
 RUN groupadd -g 1000 agent \

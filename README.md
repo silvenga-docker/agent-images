@@ -11,6 +11,7 @@ This is an opinionated agent container image for personal use in experimenting w
 - **Runtimes**: Python 3, Bun, Node 20 (via nvm), plus Rust build toolchain (cmake, clang, lld).
 - **Dev Tools**: Git, ripgrep, fd, jq, sqlite3, PostgreSQL client, Redis client.
 - **Network**: nmap, mtr, tshark, tcpdump, socat, proxychains4, dnsutils.
+- **Browser**: Google Chrome stable (headless-capable, for Playwright/MCP browser tools).
 - **Agent**: [OpenCode](https://github.com/anomalyco/opencode) pre-installed.
 - **Containers**: Docker CE (`docker`, `docker compose`) via the official Docker apt repository.
 

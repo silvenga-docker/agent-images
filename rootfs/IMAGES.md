@@ -20,6 +20,9 @@ Agent workloads (OpenCode, OpenChamber) run as `agent` (uid 1000) inside a Debia
 **Network**
 `openssh-client`, `nmap`, `mtr`, `socat`, `proxychains4`, `tshark`, `tcpdump` (`dumpcap` has `cap_net_raw`), `dig`/`nslookup`, `whois`
 
+**Browser**
+`google-chrome-stable` — Google Chrome, headless-capable; used by Playwright/MCP browser tools
+
 **Build**
 `gcc`, `g++`, `clang`, `lld`, `cmake`, `make`, `pkg-config`, `libssl-dev`, `libclang-dev`
 
