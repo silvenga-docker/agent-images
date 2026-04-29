@@ -32,11 +32,9 @@ fi
 
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-if ! nvm ls 20 >/dev/null 2>&1; then
-    echo "Installing Node 20..."
-    nvm install 20
-fi
-nvm alias default 20
+echo "Installing/Updating Node LTS..."
+nvm install lts/*
+nvm alias default lts/*
 nvm use default
 ln -sfn "$(dirname "$(dirname "$(nvm which default)")")" "$NVM_DIR/current"
 
