@@ -4,8 +4,8 @@ services:
     image: agent-image
     container_name: agent
     ports:
-      - "4096:4096"
-      - "3000:3000"
+      - "4097:4096"
+      - "3001:3000"
     volumes:
       - agent-home:/home/agent
       - docker-data:/var/lib/docker

@@ -29,7 +29,7 @@ Agent workloads (OpenCode, OpenChamber) run as `agent` (uid 1000) inside a Debia
 **Runtimes** (user-space, persistent in `/home/agent`)
 - `python3`, `pip` (`python3-pip`), `pipx`
 - Rust / Cargo: `~/.cargo` — `cargo`, `rustc`, `rustup`
-- Node 20 / npm / npx: `~/.nvm/current/bin`
+- Node LTS / npm / npx: `~/.nvm/current/bin`
 - Bun: `~/.bun` — `bun`, `bunx`
 
 **Containers**

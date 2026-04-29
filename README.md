@@ -8,7 +8,7 @@ This is an opinionated agent container image for personal use in experimenting w
 
 - **Base**: Debian Trixie (slim), running under Sysbox with Docker-in-Docker support.
 - **Init**: [s6-overlay](https://github.com/just-containers/s6-overlay) for process supervision.
-- **Runtimes**: Python 3, Bun, Node 20 (via nvm), plus Rust build toolchain (cmake, clang, lld).
+- **Runtimes**: Python 3, Bun, Node LTS (via nvm), plus Rust build toolchain (cmake, clang, lld).
 - **Dev Tools**: Git, ripgrep, fd, jq, sqlite3, PostgreSQL client, Redis client.
 - **Network**: nmap, mtr, tshark, tcpdump, socat, proxychains4, dnsutils.
 - **Browser**: Google Chrome stable (headless-capable, for Playwright/MCP browser tools).
