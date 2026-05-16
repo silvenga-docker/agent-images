@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# rm wrapper that protects critical directories from accidental deletion.
+# Place this script at a higher PATH priority than /bin/rm (e.g. /usr/local/bin/rm).
+
+set -euo pipefail
+
+readonly REAL_RM="/bin/rm"
+readonly FORCE_FLAG="--i-really-mean-it"
+readonly PROTECTED=(
+    "/home"
+    "/home/agent"
+    "/home/agent/.config"
+)
+
+# Check for the override flag.
+has_force=false
+filtered_args=()
+for arg in "$@"; do
+    if [[ "$arg" == "$FORCE_FLAG" ]]; then
+        has_force=true
+    else
+        filtered_args+=("$arg")
+    fi
+done
+
+if $has_force; then
+    exec "$REAL_RM" "${filtered_args[@]}"
+fi
+
+# Extract target paths from arguments, skipping options and honouring --.
+targets=()
+saw_dashdash=false
+for arg in "$@"; do
+    if $saw_dashdash; then
+        targets+=("$arg")
+    elif [[ "$arg" == "--" ]]; then
+        saw_dashdash=true
+    elif [[ "$arg" == -* ]]; then
+        continue
+    else
+        targets+=("$arg")
+    fi
+done
+
+for target in "${targets[@]}"; do
+    # Resolve to an absolute path without requiring the path to exist.
+    resolved=$(realpath -m "$target")
+
+    for protected in "${PROTECTED[@]}"; do
+        if [[ "$resolved" == "$protected" ]]; then
+            size=$(du -sh "$protected" 2>/dev/null | cut -f1)
+            cat >&2 <<EOF
+Error: Refusing to delete protected directory: $protected
+This directory is ${size:-unknown} in size. If you really mean to delete it, use:
+  rm --i-really-mean-it $*
+EOF
+            exit 1
+        fi
+    done
+done
+
+exec "$REAL_RM" "$@"

@@ -95,6 +95,7 @@ RUN groupadd -g 1000 agent \
     && useradd -u 1000 -g 1000 -m -s /bin/bash agent \
     && usermod -aG docker agent \
     && chmod +x /usr/local/bin/agent-setup.sh \
+    && chmod +x /usr/local/bin/rm \
     && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
     && git config --system core.excludesFile /etc/gitignore_global
 
