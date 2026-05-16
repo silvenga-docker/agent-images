@@ -42,10 +42,6 @@ This image is designed to run under the [Sysbox](https://github.com/nestybox/sys
 
 Sysbox runtime 0-day exploits are out of scope. No additional capability grants, seccomp overrides, or SELinux workarounds are needed when running under Sysbox.
 
-## Known Limitations
-
-- Inner container port mapping to the host is not supported (Docker networking limitation). Use shared volumes under `/home/agent` for data exchange.
-
 ## License
 
 See [LICENSE](LICENSE).
