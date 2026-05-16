@@ -110,7 +110,19 @@ RUN printf '#include <signal.h>\n#include <stdio.h>\nint main(void){if(kill(1,SI
 
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_KEEP_ENV=1 \
+    CI=true \
+    DEBIAN_FRONTEND=noninteractive \
+    GIT_TERMINAL_PROMPT=0 \
+    GIT_EDITOR=: \
+    EDITOR=: \
+    VISUAL= \
+    GIT_SEQUENCE_EDITOR=: \
+    GIT_MERGE_AUTOEDIT=no \
+    GIT_PAGER=cat \
     PAGER=cat \
+    npm_config_yes=true \
+    PIP_NO_INPUT=1 \
+    YARN_ENABLE_IMMUTABLE_INSTALLS=false \
     BUN_INSTALL="/home/agent/.bun" \
     CARGO_HOME="/home/agent/.cargo" \
     NVM_DIR="/home/agent/.nvm" \
