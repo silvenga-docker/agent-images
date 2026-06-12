@@ -124,6 +124,7 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     YARN_ENABLE_IMMUTABLE_INSTALLS=false \
     BUN_INSTALL="/home/agent/.bun" \
     CARGO_HOME="/home/agent/.cargo" \
+    RUSTC_WRAPPER="/home/agent/.cargo/bin/sccache" \
     NVM_DIR="/home/agent/.nvm" \
     PATH="/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:/home/agent/.local/bin:${PATH}"
 
