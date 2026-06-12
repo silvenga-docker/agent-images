@@ -20,6 +20,20 @@ else
     echo "Cargo/Rustup already installed."
 fi
 
+if ! command -v cargo-binstall &>/dev/null; then
+    echo "Installing cargo-binstall..."
+    BINSTALL_SHA256=d3a93702160e0ec03e2a4e996855db1f01adee801fb84a43add24e0877ef8eae
+    curl -fsSL "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/30b5ca8b54e1dcffd9548bc87ede1531310fdc67/install-from-binstall-release.sh" -o /tmp/install-binstall.sh
+    echo "${BINSTALL_SHA256}  /tmp/install-binstall.sh" | sha256sum -c -
+    bash /tmp/install-binstall.sh
+    rm /tmp/install-binstall.sh
+else
+    echo "cargo-binstall already installed."
+fi
+
+echo "Installing/Updating sccache..."
+cargo binstall sccache --no-confirm
+
 if [ ! -d "$NVM_DIR" ]; then
     echo "Installing nvm..."
     NVM_VERSION=v0.40.1
