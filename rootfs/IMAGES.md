@@ -32,6 +32,13 @@ Agent workloads (OpenCode, OpenChamber) run as `agent` (uid 1000) inside a Debia
 - Node LTS / npm / npx: `~/.nvm/current/bin`
 - Bun: `~/.bun` - `bun`, `bunx`
 
+**Android** (user-space, persistent in `/home/agent/Android` and `/home/agent/.local`)
+- OpenJDK 21 LTS: `java`, `javac` (`$JAVA_HOME/bin`)
+- Android SDK: `sdkmanager`, `avdmanager` (`$ANDROID_HOME/cmdline-tools/latest/bin`)
+- Build-tools 36.0.0: `aapt2`, `d8`, etc. (`$ANDROID_HOME/build-tools/36.0.0`)
+- NDK r28.x: `ANDROID_NDK_HOME` / `ANDROID_NDK_ROOT` point to `$ANDROID_HOME/ndk/current` (symlink to the installed version)
+- Gradle 9.5.1: `gradle` (`$GRADLE_HOME/bin`)
+
 **Containers**
 `docker`, `docker compose` - inner Docker daemon runs inside this container (Docker-in-Docker)
 
@@ -42,8 +49,23 @@ Agent workloads (OpenCode, OpenChamber) run as `agent` (uid 1000) inside a Debia
 ~/.bun/bin
 ~/.nvm/current/bin
 ~/.local/bin
+$JAVA_HOME/bin
+$ANDROID_HOME/cmdline-tools/latest/bin
+$ANDROID_HOME/build-tools/36.0.0
+$GRADLE_HOME/bin
 /usr/local/bin  (and standard system paths)
 ```
+
+## Environment Variables
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `JAVA_HOME` | `/usr/lib/jvm/java-21-openjdk-amd64` | JDK 21 location (apt-installed) |
+| `ANDROID_HOME` | `/home/agent/Android/Sdk` | Android SDK root |
+| `ANDROID_SDK_ROOT` | `/home/agent/Android/Sdk` | Alias of `ANDROID_HOME` |
+| `ANDROID_NDK_HOME` | `/home/agent/Android/Sdk/ndk/current` | NDK root (symlink to installed version) |
+| `ANDROID_NDK_ROOT` | `/home/agent/Android/Sdk/ndk/current` | Alias of `ANDROID_NDK_HOME` |
+| `GRADLE_HOME` | `/home/agent/.local/gradle-9.5.1` | Gradle install dir |
 
 ## Installing New Tools
 
