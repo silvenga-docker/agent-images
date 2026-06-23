@@ -4,6 +4,8 @@ set -e
 : "${CARGO_HOME:?CARGO_HOME is unset or empty}"
 : "${NVM_DIR:?NVM_DIR is unset or empty}"
 : "${BUN_INSTALL:?BUN_INSTALL is unset or empty}"
+: "${ANDROID_HOME:?ANDROID_HOME is unset or empty}"
+: "${GRADLE_HOME:?GRADLE_HOME is unset or empty}"
 
 echo "Ensuring tools are installed for user $(id -un)..."
 
@@ -66,6 +68,55 @@ if [ ! -d "$BUN_INSTALL" ]; then
     mv /tmp/bun-extract/bun-linux-x64/bun "${BUN_INSTALL}/bin/bun"
     ln -sf "${BUN_INSTALL}/bin/bun" "${BUN_INSTALL}/bin/bunx"
     rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
+fi
+
+# SHA-1 is the only checksum Google publishes for cmdline-tools.
+CMDLINETOOLS_BUILD=15641748
+CMDLINETOOLS_SHA1=63523a02a975a81102238566f2a16c057d52301e
+if [ ! -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
+    echo "Installing Android SDK Command-line Tools (build ${CMDLINETOOLS_BUILD})..."
+    curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINETOOLS_BUILD}_latest.zip" -o /tmp/cmdline-tools.zip
+    echo "${CMDLINETOOLS_SHA1}  /tmp/cmdline-tools.zip" | sha1sum -c -
+    unzip -q /tmp/cmdline-tools.zip -d /tmp/cmdline-tools-extract
+    mkdir -p "$ANDROID_HOME/cmdline-tools"
+    mv /tmp/cmdline-tools-extract/cmdline-tools "$ANDROID_HOME/cmdline-tools/latest"
+    rm -rf /tmp/cmdline-tools.zip /tmp/cmdline-tools-extract
+else
+    echo "Android SDK Command-line Tools already installed."
+fi
+
+if [ ! -L "$ANDROID_HOME/ndk/current" ]; then
+    echo "Accepting Android SDK licenses..."
+    yes | sdkmanager --licenses >/dev/null 2>&1 || true
+
+    echo "Installing Android SDK components (build-tools 36.0.0, platform android-36, cmake 3.22.1)..."
+    sdkmanager "build-tools;36.0.0" "platforms;android-36" "cmake;3.22.1"
+
+    echo "Installing latest NDK r28.x..."
+    NDK_VERSION=$(sdkmanager --list | grep -oP 'ndk;28\.\K[0-9.]+' | sort -V | tail -1)
+    if [ -z "$NDK_VERSION" ]; then
+        echo "ERROR: No NDK r28.x found in sdkmanager --list. Skipping NDK install." >&2
+    else
+        sdkmanager "ndk;28.${NDK_VERSION}"
+        ln -sfn "$ANDROID_HOME/ndk/28.${NDK_VERSION}" "$ANDROID_HOME/ndk/current"
+        echo "NDK 28.${NDK_VERSION} installed, symlinked to ndk/current."
+    fi
+else
+    echo "Android NDK already installed (ndk/current symlink exists)."
+fi
+
+GRADLE_VERSION=9.5.1
+GRADLE_SHA256=bafc141b619ad6350fd975fc903156dd5c151998cc8b058e8c1044ab5f7b031f
+if [ ! -d "$GRADLE_HOME" ]; then
+    echo "Installing Gradle ${GRADLE_VERSION}..."
+    curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle-bin.zip
+    echo "${GRADLE_SHA256}  /tmp/gradle-bin.zip" | sha256sum -c -
+    unzip -q /tmp/gradle-bin.zip -d /tmp/gradle-extract
+    mkdir -p "$(dirname "$GRADLE_HOME")"
+    mv "/tmp/gradle-extract/gradle-${GRADLE_VERSION}" "$GRADLE_HOME"
+    rm -rf /tmp/gradle-bin.zip /tmp/gradle-extract
+else
+    echo "Gradle already installed."
 fi
 
 echo "Installing/Upgrading OpenCode..."

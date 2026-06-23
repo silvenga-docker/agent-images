@@ -56,6 +56,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     clang \
     lld \
     libclang-dev \
+    openjdk-21-jdk-headless \
     jq \
     sqlite3 \
     unzip \
@@ -126,7 +127,14 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     CARGO_HOME="/home/agent/.cargo" \
     RUSTC_WRAPPER="/home/agent/.cargo/bin/sccache" \
     NVM_DIR="/home/agent/.nvm" \
-    PATH="/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:/home/agent/.local/bin:${PATH}"
+    JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64" \
+    ANDROID_HOME="/home/agent/Android/Sdk" \
+    ANDROID_SDK_ROOT="/home/agent/Android/Sdk" \
+    ANDROID_NDK_HOME="/home/agent/Android/Sdk/ndk/current" \
+    ANDROID_NDK_ROOT="/home/agent/Android/Sdk/ndk/current" \
+    GRADLE_HOME="/home/agent/.local/gradle-9.5.1"
+
+ENV PATH="${JAVA_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/build-tools/36.0.0:${GRADLE_HOME}/bin:/home/agent/.cargo/bin:/home/agent/.bun/bin:/home/agent/.nvm/current/bin:/home/agent/.local/bin:${PATH}"
 
 VOLUME ["/home/agent", "/var/lib/docker", "/tmp"]
 

@@ -10,6 +10,8 @@ services:
       - agent-home:/home/agent
       - docker-data:/var/lib/docker
     privileged: true
+    environment:
+      - OPENCHAMBER_ALLOW_UNAUTHENTICATED_LAN=true
     # runtime: sysbox-runc  # Enable when running with Sysbox; replace privileged: true
 
 volumes:
