@@ -70,10 +70,7 @@ if [ ! -d "$BUN_INSTALL" ]; then
     rm -rf /tmp/bun-linux-x64.zip /tmp/bun-extract
 fi
 
-# Pinned build: 15641748 (cmdline-tools;21.0). Check for newer builds at:
-# https://dl.google.com/android/repository/repository2-3.xml (search "commandlinetools-linux")
-# NOTE: Google publishes only SHA-1 for cmdline-tools, not SHA-256. This is the
-# sole deviation from the SHA-256 norm used everywhere else in this script.
+# SHA-1 is the only checksum Google publishes for cmdline-tools.
 CMDLINETOOLS_BUILD=15641748
 CMDLINETOOLS_SHA1=63523a02a975a81102238566f2a16c057d52301e
 if [ ! -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
@@ -88,9 +85,6 @@ else
     echo "Android SDK Command-line Tools already installed."
 fi
 
-# NDK version is resolved at install time (dynamic), so a stable ndk/current
-# symlink is created — ANDROID_NDK_HOME/ROOT (Dockerfile ENV) point to it.
-# The in-container agent can self-update the NDK and refresh the symlink.
 if [ ! -L "$ANDROID_HOME/ndk/current" ]; then
     echo "Accepting Android SDK licenses..."
     yes | sdkmanager --licenses >/dev/null 2>&1 || true
@@ -111,7 +105,6 @@ else
     echo "Android NDK already installed (ndk/current symlink exists)."
 fi
 
-# Pinned: 9.5.1. Check for newer 9.x at https://gradle.org/releases/
 GRADLE_VERSION=9.5.1
 GRADLE_SHA256=bafc141b619ad6350fd975fc903156dd5c151998cc8b058e8c1044ab5f7b031f
 if [ ! -d "$GRADLE_HOME" ]; then
