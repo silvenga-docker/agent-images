@@ -28,6 +28,10 @@ jobs:
       - name: Start and wait for healthy container
         run: docker compose up --force-recreate --renew-anon-volumes --wait --wait-timeout 600
 
+      - name: Dump container logs
+        if: always()
+        run: docker compose logs
+
       - name: Cleanup
         if: always()
         run: docker compose down || true
