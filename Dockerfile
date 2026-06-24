@@ -74,6 +74,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     proxychains4 \
     bsdextrautils \
     b3sum \
+    file \
+    xxd \
     containerd.io \
     docker-ce \
     docker-ce-cli \
@@ -100,7 +102,11 @@ RUN groupadd -g 1000 agent \
     && chmod +x /usr/local/bin/healthcheck.sh \
     && chmod +x /usr/local/bin/rm \
     && setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap \
-    && git config --system core.excludesFile /etc/gitignore_global
+    && git config --system core.excludesFile /etc/gitignore_global \
+    && install -d -m 0755 /var/lib/java-cacerts \
+    && ln -sfn /var/lib/java-cacerts/cacerts /usr/lib/jvm/java-21-openjdk-amd64/lib/security/cacerts \
+    && javac -d /usr/local/bin /usr/local/bin/gen-cacerts.java \
+    && rm /usr/local/bin/gen-cacerts.java
 
 # Keep rootfs/IMAGES.md in sync when adding or removing packages
 
