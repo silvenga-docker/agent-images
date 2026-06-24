@@ -1,5 +1,6 @@
 #!/command/execlineb -P
 with-contenv
+if { /bin/sh -c "/usr/local/bin/generate-java-cacerts.sh" }
 export HOME /home/agent
 s6-setuidgid agent
 cd /home/agent
