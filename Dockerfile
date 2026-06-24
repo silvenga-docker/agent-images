@@ -141,5 +141,5 @@ VOLUME ["/home/agent", "/var/lib/docker", "/tmp"]
 
 ENTRYPOINT ["/init"]
 
-HEALTHCHECK --interval=2s --timeout=5s --start-period=10m --retries=3 \
+HEALTHCHECK --start-interval=2s --timeout=5s --start-period=10m \
   CMD /usr/local/bin/healthcheck.sh
