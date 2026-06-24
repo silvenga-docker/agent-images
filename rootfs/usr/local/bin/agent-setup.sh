@@ -7,6 +7,22 @@ set -e
 : "${ANDROID_HOME:?ANDROID_HOME is unset or empty}"
 : "${GRADLE_HOME:?GRADLE_HOME is unset or empty}"
 
+retry() {
+    local attempts=$1 max_backoff=$2
+    shift 2
+    local n=0 wait=$max_backoff
+    until "$@"; do
+        n=$((n + 1))
+        if [ "$n" -ge "$attempts" ]; then
+            echo "retry: command failed after $attempts attempts: $*" >&2
+            return 1
+        fi
+        echo "retry: attempt $n/$attempts failed, retrying in ${wait}s..." >&2
+        sleep "$wait"
+        wait=$((wait * 2))
+    done
+}
+
 echo "Ensuring tools are installed for user $(id -un)..."
 
 if [ ! -d "$CARGO_HOME" ]; then
@@ -87,17 +103,17 @@ fi
 
 if [ ! -L "$ANDROID_HOME/ndk/current" ]; then
     echo "Accepting Android SDK licenses..."
-    yes | sdkmanager --licenses >/dev/null 2>&1 || true
+    retry 3 5 bash -c 'yes | sdkmanager --licenses' >/dev/null 2>&1 || true
 
     echo "Installing Android SDK components (build-tools 36.0.0, platform android-36, cmake 3.22.1)..."
-    sdkmanager "build-tools;36.0.0" "platforms;android-36" "cmake;3.22.1"
+    retry 5 5 sdkmanager "build-tools;36.0.0" "platforms;android-36" "cmake;3.22.1"
 
     echo "Installing latest NDK r28.x..."
-    NDK_VERSION=$(sdkmanager --list | grep -oP 'ndk;28\.\K[0-9.]+' | sort -V | tail -1)
+    NDK_VERSION=$(retry 5 5 sdkmanager --list | grep -oP 'ndk;28\.\K[0-9.]+' | sort -V | tail -1)
     if [ -z "$NDK_VERSION" ]; then
         echo "ERROR: No NDK r28.x found in sdkmanager --list. Skipping NDK install." >&2
     else
-        sdkmanager "ndk;28.${NDK_VERSION}"
+        retry 5 5 sdkmanager "ndk;28.${NDK_VERSION}"
         ln -sfn "$ANDROID_HOME/ndk/28.${NDK_VERSION}" "$ANDROID_HOME/ndk/current"
         echo "NDK 28.${NDK_VERSION} installed, symlinked to ndk/current."
     fi
