@@ -108,8 +108,6 @@ RUN groupadd -g 1000 agent \
     && javac -d /usr/local/bin /usr/local/bin/gen-cacerts.java \
     && rm /usr/local/bin/gen-cacerts.java
 
-# Keep rootfs/IMAGES.md in sync when adding or removing packages
-
 RUN printf '#include <signal.h>\n#include <stdio.h>\nint main(void){if(kill(1,SIGTERM)!=0){perror("reboot: kill");return 1;}return 0;}' > /tmp/reboot.c \
     && gcc -O2 -o /usr/local/bin/reboot /tmp/reboot.c \
     && setcap cap_kill=eip /usr/local/bin/reboot \
@@ -147,5 +145,4 @@ VOLUME ["/home/agent", "/var/lib/docker", "/tmp"]
 
 ENTRYPOINT ["/init"]
 
-HEALTHCHECK --start-interval=2s --timeout=5s --start-period=10m \
-  CMD /usr/local/bin/healthcheck.sh
+HEALTHCHECK --start-interval=2s --timeout=5s --start-period=10m CMD /usr/local/bin/healthcheck.sh
